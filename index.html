@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+<head>
+  <meta charset="UTF-8">
+  <title>متابعة جودة الإنتاج</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link
+    href="https://fonts.googleapis.com/css2?family=Cairo:wght@500;700;900&family=IBM+Plex+Mono:wght@500;600&display=swap"
+    rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body>
+  <div class="wrap">
+
+    <header>
+      <p class="eyebrow">ELEVEN · QUALITY CONTROL</p>
+      <h1>proudction Quality monitaring</h1>
+      <p class="sub">Recording all proudction batches and automatically calculating the quality rate</p>
+    </header>
+
+    <div class="panel">
+      <h2>Add a new proudction Batch</h2>
+      <div class="form-grid">
+        <div>
+          <label>Proudaction Name</label>
+          <input type="text" id="nameInput" placeholder="مثال: قميص قطن أبيض">
+        </div>
+        <div>
+          <label>Quantity</label>
+          <input type="number" id="quantityInput" placeholder="200">
+        </div>
+        <div>
+          <label>Rejected</label>
+          <input type="number" id="rejectedInput" placeholder="8">
+        </div>
+        <div>
+          <label>statue</label>
+          <select id="statusInput">
+            <option>under inspection</option>
+            <option>Accepted</option>
+            <option>Rejected</option>
+          </select>
+        </div>
+        <button id="addBtn">Add Batch</button>
+      </div>
+    </div>
+
+    <hr class="stitch">
+
+    <div class="panel">
+      <h2>Proudection Batch Records</h2>
+
+      <div class="search-row">
+        <input type="text" id="searchInput" placeholder="ابحثي بالاسم أو الحالة...">
+        <button id="searchBtn">Search</button>
+        <button id="deleteAllBtn" class="danger-btn">🚫 Delete All</button>
+      </div>
+
+      <table>
+        <thead>
+          <tr>
+            <th>Proudect</th>
+            <th>Quantity</th>
+            <th>Rejected</th>
+            <th> Quality rate</th>
+            <th>statue</th>
+            <th>#</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody id="tableBody"></tbody>
+      </table>
+      <p class="note">the % is (quantity − rejected) / quantity</p>
+    </div>
+
+    <div class="panel">
+      <h2> Trash <button id="emptyTrashBtn" class="danger-btn"> 🗑️empty trash</button></h2>
+      <div id="trashList"></div>
+    </div>
+
+  </div>
+
+  <!-- ترتيب التحميل مهم: data قبل ui قبل main -->
+  <script src="js/data.js"></script>
+  <script src="js/ui.js"></script>
+  <script src="js/main.js"></script>
+</body>
+
+</html>
