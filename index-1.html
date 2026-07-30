@@ -1,0 +1,608 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<title>متابعة جودة الإنتاج</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@500;700;900&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#1c2333;
+  --denim:#26344d;
+  --denim-2:#334463;
+  --fabric:#f6f2ea;
+  --thread-good:#3a7d5c;
+  --thread-good-bg:#e4f0e8;
+  --thread-pending:#b8862f;
+  --thread-pending-bg:#f6ecd8;
+  --thread-bad:#a63d3d;
+  --thread-bad-bg:#f5e3e1;
+}
+*{box-sizing:border-box;}
+body{
+  margin:0;
+  min-height:100vh;
+  background:
+    radial-gradient(circle at 15% -10%, rgba(38,52,77,0.10), transparent 45%),
+    radial-gradient(circle at 100% 0%, rgba(178,134,47,0.08), transparent 40%),
+    repeating-linear-gradient(45deg, rgba(28,35,51,0.028) 0px, rgba(28,35,51,0.028) 1px, transparent 1px, transparent 14px),
+    repeating-linear-gradient(-45deg, rgba(28,35,51,0.022) 0px, rgba(28,35,51,0.022) 1px, transparent 1px, transparent 14px),
+    var(--fabric);
+  font-family:'Cairo', sans-serif;
+  color:var(--ink);
+  padding:32px 20px 60px;
+}
+.wrap{max-width:880px;margin:0 auto;}
+
+header{
+  background:linear-gradient(135deg, var(--denim) 0%, #1a2338 100%);
+  color:#f6f2ea;
+  border-radius:14px;
+  padding:30px 30px;
+  position:relative;
+  margin-bottom:28px;
+  box-shadow:0 6px 20px -10px rgba(26,35,56,0.45);
+}
+.eyebrow{
+  font-family:'IBM Plex Mono', monospace;
+  font-size:12px;
+  letter-spacing:.12em;
+  color:#c9b98a;
+  margin:0 0 8px;
+}
+h1{margin:0; font-size:26px; font-weight:900;}
+.sub{margin:6px 0 0; color:#b9c2d6; font-size:14px;}
+
+.stitch{
+  border:none;
+  border-top:2px dashed rgba(28,35,51,0.25);
+  margin:24px 0;
+}
+
+.panel{
+  background:#fff;
+  border:1px solid rgba(28,35,51,0.08);
+  border-radius:12px;
+  padding:22px;
+  margin-bottom:24px;
+  box-shadow:0 1px 2px rgba(28,35,51,0.04);
+}
+.panel h2{
+  font-size:15px;
+  margin:0 0 16px;
+  display:flex; align-items:center; gap:8px;
+}
+.panel h2::before{
+  content:"";
+  width:8px;height:8px;border-radius:2px;
+  background:var(--denim-2);
+  display:inline-block;
+}
+
+.form-grid{
+  display:grid;
+  grid-template-columns:1.4fr .8fr .8fr 1fr auto;
+  gap:12px;
+}
+@media(max-width:700px){ .form-grid{grid-template-columns:1fr 1fr;} }
+
+label{
+  display:block;
+  font-size:12px;
+  color:#5b6478;
+  margin-bottom:6px;
+  font-weight:700;
+}
+input, select{
+  width:100%;
+  padding:10px 12px;
+  border:1.5px solid #dcd6c8;
+  border-radius:8px;
+  font-family:'Cairo', sans-serif;
+  font-size:14px;
+  background:#fdfcf9;
+  color:var(--ink);
+}
+input:focus, select:focus{
+  outline:2px solid var(--denim-2);
+  outline-offset:1px;
+  border-color:var(--denim-2);
+}
+button{
+  align-self:end;
+  background:var(--denim);
+  color:#f6f2ea;
+  border:none;
+  padding:10px 20px;
+  border-radius:8px;
+  font-family:'Cairo', sans-serif;
+  font-weight:700;
+  font-size:14px;
+  cursor:pointer;
+  white-space:nowrap;
+}
+button:hover{background:var(--denim-2);}
+
+table{
+  width:100%;
+  border-collapse:collapse;
+  font-size:14px;
+}
+thead th{
+  text-align:right;
+  font-size:12px;
+  color:#5b6478;
+  font-weight:700;
+  padding:10px 12px;
+  border-bottom:2px solid #e7e2d6;
+}
+tbody td{
+  padding:13px 12px;
+  border-bottom:1px solid #ede8dc;
+}
+tbody tr:last-child td{border-bottom:none;}
+.qty{font-family:'IBM Plex Mono', monospace; font-weight:600;}
+.rate{font-family:'IBM Plex Mono', monospace; font-weight:600;}
+
+.badge{
+  display:inline-flex;
+  align-items:center;
+  gap:6px;
+  padding:4px 12px;
+  border-radius:999px;
+  font-size:12.5px;
+  font-weight:700;
+}
+.badge::before{content:"";width:7px;height:7px;border-radius:50%;}
+.good{background:var(--thread-good-bg); color:var(--thread-good);}
+.good::before{background:var(--thread-good);}
+.pending{background:var(--thread-pending-bg); color:var(--thread-pending);}
+.pending::before{background:var(--thread-pending);}
+.bad{background:var(--thread-bad-bg); color:var(--thread-bad);}
+.bad::before{background:var(--thread-bad);}
+
+tr.row-good{background:linear-gradient(to left, var(--thread-good-bg) 0%, transparent 6%);}
+tr.row-pending{background:linear-gradient(to left, var(--thread-pending-bg) 0%, transparent 6%);}
+tr.row-bad{background:linear-gradient(to left, var(--thread-bad-bg) 0%, transparent 6%);}
+
+.search-row{margin-bottom:14px; display:flex; gap:8px;}
+.search-row input{max-width:280px;}
+.search-row button{
+  background:var(--denim-2);
+  padding:9px 18px;
+  font-size:13.5px;
+}
+.danger-btn{
+  background:transparent !important;
+  border:1.5px solid var(--thread-bad);
+  color:var(--thread-bad);
+  margin-inline-start:auto;
+}
+.danger-btn:hover{background:var(--thread-bad-bg) !important;}
+
+.trash-empty{color:#9a9482; font-size:13.5px; margin:0;}
+.trash-item{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding:10px 4px;
+  border-bottom:1px solid #ede8dc;
+  font-size:13.5px;
+}
+.trash-item:last-child{border-bottom:none;}
+.trash-actions{display:flex; gap:6px;}
+.restore-btn{
+  background:transparent;
+  border:1.5px solid var(--thread-good);
+  color:var(--thread-good);
+  padding:5px 12px;
+  border-radius:6px;
+  font-size:12.5px;
+  font-family:'Cairo', sans-serif;
+  font-weight:700;
+  cursor:pointer;
+}
+.restore-btn:hover{background:var(--thread-good-bg);}
+.delete-forever-btn{
+  background:transparent;
+  border:1.5px solid #9a9482;
+  color:#7a7466;
+  padding:5px 12px;
+  border-radius:6px;
+  font-size:12.5px;
+  font-family:'Cairo', sans-serif;
+  font-weight:700;
+  cursor:pointer;
+}
+.delete-forever-btn:hover{background:#ede8dc;}
+
+
+.action-group{display:flex; gap:6px; justify-content:flex-end;}
+.delete-btn, .edit-btn{
+  padding:5px 12px;
+  border-radius:6px;
+  font-size:12.5px;
+  font-family:'Cairo', sans-serif;
+  font-weight:700;
+  cursor:pointer;
+  background:transparent;
+}
+.delete-btn{border:1.5px solid var(--thread-bad); color:var(--thread-bad);}
+.delete-btn:hover{background:var(--thread-bad-bg);}
+.edit-btn{border:1.5px solid var(--denim-2); color:var(--denim-2);}
+.edit-btn:hover{background:#e8ecf3;}
+
+.note{
+  font-family:'IBM Plex Mono', monospace;
+  font-size:12px;
+  color:#9a9482;
+  text-align:left;
+  margin-top:10px;
+}
+
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <p class="eyebrow">ELEVEN · QUALITY CONTROL</p>
+    <h1>متابعة جودة دفعات الإنتاج</h1>
+    <p class="sub">تسجيل كل دفعة إنتاج وحساب نسبة الجودة تلقائيًا</p>
+  </header>
+
+  <div class="panel">
+    <h2>إضافة دفعة جديدة</h2>
+    <div class="form-grid">
+      <div>
+        <label>اسم المنتج</label>
+        <input type="text" id="nameInput" placeholder="مثال: قميص قطن أبيض">
+      </div>
+      <div>
+        <label>الكمية</label>
+        <input type="number" id="quantityInput" placeholder="200">
+      </div>
+      <div>
+        <label>المرفوض</label>
+        <input type="number" id="rejectedInput" placeholder="8">
+      </div>
+      <div>
+        <label>الحالة</label>
+        <select id="statusInput">
+          <option>قيد الفحص</option>
+          <option>مقبول</option>
+          <option>مرفوض</option>
+        </select>
+      </div>
+      <button id="addBtn">إضافة دفعة</button>
+    </div>
+  </div>
+
+  <hr class="stitch">
+
+  <div class="panel">
+    <h2>سجل الدفعات</h2>
+
+    <div class="search-row">
+      <input type="text" id="searchInput" placeholder="ابحثي بالاسم أو الحالة...">
+      <button id="searchBtn">بحث</button>
+      <button id="deleteAllBtn" class="danger-btn">حذف الكل</button>
+    </div>
+
+    <table>
+      <thead>
+        <tr>
+          <th>المنتج</th>
+          <th>الكمية</th>
+          <th>المرفوض</th>
+          <th>نسبة الجودة</th>
+          <th>الحالة</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody id="tableBody"></tbody>
+    </table>
+    <p class="note">the % is (quantity − rejected) / quantity</p>
+  </div>
+
+  <div class="panel">
+    <h2>سلة المهملات</h2>
+    <div id="trashList"></div>
+  </div>
+
+</div>
+
+<!-- ترتيب التحميل مهم: data قبل ui قبل main -->
+<script>
+// data.js
+// هنا بس البيانات والمنطق اللي مالوش علاقة بالشاشة (مفيش document.getElementById هنا)
+
+// 1) مكان تخزين كل الدفعات في الذاكرة
+var batches = [];
+
+// سلة المهملات - أي دفعة اتحذفت بتترحّل هنا بدل ما تضيع خالص
+var deletedBatches = [];
+
+// لو مش بنعدل حاجة، القيمة null - لو بنعدل، بتبقى رقم انديكس الصف
+var editingIndex = null;
+
+// بتحسب نسبة الجودة لأي دفعة
+function calcQualityRate(batch) {
+  return ((batch.quantity - batch.rejected) / batch.quantity) * 100;
+}
+
+// بتحول الحالة العربي لاسم كلاس CSS (بالإنجليزي عشان الكلاسات)
+function statusClass(status) {
+  if (status === "مقبول") return "good";
+  if (status === "قيد الفحص") return "pending";
+  return "bad";
+}
+
+// بتحفظ batches و deletedBatches في localStorage - عشان البيانات متضيعش مع الريفريش
+function saveToStorage() {
+  localStorage.setItem("qc_batches", JSON.stringify(batches));
+  localStorage.setItem("qc_deleted", JSON.stringify(deletedBatches));
+}
+
+// بتقرأ البيانات المحفوظة وقت ما الصفحة تفتح من جديد
+function loadFromStorage() {
+  var savedBatches = localStorage.getItem("qc_batches");
+  var savedDeleted = localStorage.getItem("qc_deleted");
+
+  if (savedBatches) batches = JSON.parse(savedBatches);
+  if (savedDeleted) deletedBatches = JSON.parse(savedDeleted);
+}
+
+// بتضيف دفعة جديدة للـ array
+function addBatchData(name, quantity, rejected, status) {
+  batches.push({
+    name: name,
+    quantity: quantity,
+    rejected: rejected || 0,
+    status: status
+  });
+  saveToStorage();
+}
+
+// بتوزع الكمية على صفوف مستقلة: كل صف = قطعة واحدة (quantity: 1)
+// أول "rejected" قطعة بتتسجل مرفوضة، والباقي مقبول
+function addBatchAsUnits(name, quantity, rejected) {
+  rejected = rejected || 0;
+  for (var i = 0; i < quantity; i++) {
+    var isRejected = i < rejected;
+    batches.push({
+      name: name,
+      quantity: 1,
+      rejected: isRejected ? 1 : 0,
+      status: isRejected ? "مرفوض" : "مقبول"
+    });
+  }
+  saveToStorage();
+}
+
+// بتحدث دفعة موجودة بالانديكس بتاعها
+function updateBatchData(index, name, quantity, rejected, status) {
+  batches[index] = {
+    name: name,
+    quantity: quantity,
+    rejected: rejected || 0,
+    status: status
+  };
+  saveToStorage();
+}
+
+// بتمسح دفعة بالانديكس بتاعها - بترحّلها لسلة المهملات بدل ما تمسحها نهائي
+function deleteBatchData(index) {
+  var removed = batches.splice(index, 1)[0];
+  deletedBatches.unshift(removed); // بتحطها في أول سلة المهملات
+  saveToStorage();
+}
+
+// بتحذف كل الدفعات مرة واحدة - وبرضو بترحّلهم لسلة المهملات
+function deleteAllData() {
+  while (batches.length > 0) {
+    deletedBatches.unshift(batches.pop());
+  }
+  saveToStorage();
+}
+
+// بترجع دفعة من سلة المهملات لأعلى الجدول الأصلي
+function restoreBatchData(trashIndex) {
+  var restored = deletedBatches.splice(trashIndex, 1)[0];
+  batches.unshift(restored); // بترجعها فوق
+  saveToStorage();
+}
+
+// بتمسح دفعة من سلة المهملات نهائيًا - من غير ما ترجع لأي مكان
+function permanentlyDeleteData(trashIndex) {
+  deletedBatches.splice(trashIndex, 1);
+  saveToStorage();
+}
+
+// بترجع بس الدفعات اللي مطابقة لكلمة البحث (بالاسم أو الحالة)
+// كل عنصر راجع بيحتوي على الانديكس الحقيقي بتاعه في batches، عشان الحذف والتعديل يفضلوا شغالين بعد الفلترة
+function filterBatches(filterText) {
+  filterText = (filterText || "").trim();
+
+  var result = [];
+  batches.forEach(function (batch, index) {
+    if (!filterText ||
+        batch.name.indexOf(filterText) !== -1 ||
+        batch.status.indexOf(filterText) !== -1) {
+      result.push({ batch: batch, index: index });
+    }
+  });
+  return result;
+}
+
+</script>
+<script>
+// ui.js
+// هنا بس اللي بيرسم على الشاشة (الجدول والصفوف). البيانات نفسها في data.js
+
+var tableBody = document.getElementById("tableBody");
+var trashList = document.getElementById("trashList");
+
+// بترسم الجدول كله من جديد، ولو فيه كلمة بحث بتعرض المطابق بس
+function displayBatches(filterText) {
+  tableBody.innerHTML = "";
+  var entries = filterBatches(filterText);
+
+  entries.forEach(function (entry) {
+    var batch = entry.batch;
+    var index = entry.index;
+    var rate = calcQualityRate(batch);
+    var cls = statusClass(batch.status);
+
+    var row = document.createElement("tr");
+    row.className = "row-" + cls;
+    row.innerHTML =
+      "<td>" + batch.name + "</td>" +
+      "<td class='qty'>" + batch.quantity + "</td>" +
+      "<td class='qty'>" + batch.rejected + "</td>" +
+      "<td class='rate'>" + rate.toFixed(1) + "%</td>" +
+      "<td><span class='badge " + cls + "'>" + batch.status + "</span></td>" +
+      "<td><div class='action-group'>" +
+        "<button onclick='handleEditClick(" + index + ")'>تعديل</button>" +
+        "<button onclick='handleDeleteClick(" + index + ")'>حذف</button>" +
+      "</div></td>";
+
+    tableBody.appendChild(row);
+  });
+
+  displayTrash();
+}
+
+// بترسم سلة المهملات (الدفعات المحذوفة) مع زرار استرجاع لكل واحدة
+function displayTrash() {
+  trashList.innerHTML = "";
+
+  if (deletedBatches.length === 0) {
+    trashList.innerHTML = "<p class='trash-empty'>مفيش حاجة محذوفة دلوقتي</p>";
+    return;
+  }
+
+  deletedBatches.forEach(function (batch, trashIndex) {
+    var item = document.createElement("div");
+    item.className = "trash-item";
+    item.innerHTML =
+      "<span>" + batch.name + " — " + batch.quantity + " قطعة (" + batch.status + ")</span>" +
+      "<div class='trash-actions'>" +
+        "<button class='restore-btn' onclick='handleRestoreClick(" + trashIndex + ")'>استرجاع</button>" +
+        "<button class='delete-forever-btn' onclick='handlePermanentDeleteClick(" + trashIndex + ")'>حذف نهائي</button>" +
+      "</div>";
+    trashList.appendChild(item);
+  });
+}
+
+// الدوال الثلاثة دول بينادى عليهم مباشرة من الزرار نفسه (onclick) وقت الضغط
+// - مفيش addEventListener هنا، ومفيش رقم index بينضاع بين الرسم والضغط
+
+function handleDeleteClick(index) {
+  deleteBatchData(index);
+  displayBatches(searchInput.value);
+}
+
+function handleEditClick(index) {
+  loadBatchIntoForm(index); // الدالة دي في main.js
+}
+
+function handleRestoreClick(trashIndex) {
+  restoreBatchData(trashIndex);
+  displayBatches(searchInput.value);
+}
+
+function handlePermanentDeleteClick(trashIndex) {
+  var sure = confirm("متأكدة؟ الحذف ده نهائي ومش هيترجع بعد كده خالص.");
+  if (!sure) return;
+  permanentlyDeleteData(trashIndex);
+  displayTrash();
+}
+
+</script>
+<script>
+// main.js
+// هنا ربط عناصر الفورم بالأحداث (كليك، إدخال...) واستدعاء دوال data.js و ui.js
+
+var nameInput = document.getElementById("nameInput");
+var quantityInput = document.getElementById("quantityInput");
+var rejectedInput = document.getElementById("rejectedInput");
+var statusInput = document.getElementById("statusInput");
+var searchInput = document.getElementById("searchInput");
+var searchBtn = document.getElementById("searchBtn");
+var deleteAllBtn = document.getElementById("deleteAllBtn");
+var addBtn = document.getElementById("addBtn");
+
+// إضافة دفعة جديدة، أو حفظ تعديل لو إحنا في وضع التعديل
+function addBatch() {
+  var name = nameInput.value.trim();
+  var quantity = Number(quantityInput.value);
+  var rejected = Number(rejectedInput.value);
+
+  if (!name || !quantity) {
+    alert("اكتبي اسم المنتج والكمية");
+    return;
+  }
+  if (rejected > quantity) {
+    alert("عدد المرفوض مينفعش يكون أكبر من الكمية");
+    return;
+  }
+
+  if (editingIndex !== null) {
+    updateBatchData(editingIndex, name, quantity, rejected, statusInput.value);
+    editingIndex = null;
+    addBtn.textContent = "إضافة دفعة";
+  } else {
+    addBatchAsUnits(name, quantity, rejected);
+  }
+
+  clearForm();
+  displayBatches(searchInput.value);
+}
+
+// بتحمل بيانات صف معين في الفورم عشان تتعدل
+function loadBatchIntoForm(index) {
+  var batch = batches[index];
+
+  nameInput.value = batch.name;
+  quantityInput.value = batch.quantity;
+  rejectedInput.value = batch.rejected;
+  statusInput.value = batch.status;
+
+  editingIndex = index;
+  addBtn.textContent = "حفظ التعديل";
+}
+
+function clearForm() {
+  nameInput.value = "";
+  quantityInput.value = "";
+  rejectedInput.value = "";
+}
+
+addBtn.addEventListener("click", addBatch);
+
+// البحث بزرار، وكمان بمفتاح Enter وإحنا في الخانة
+searchBtn.addEventListener("click", function () {
+  displayBatches(searchInput.value);
+});
+searchInput.addEventListener("keydown", function (e) {
+  if (e.key === "Enter") displayBatches(searchInput.value);
+});
+
+// حذف كل الدفعات - بعد تأكيد، عشان محدش يمسح بالغلط
+deleteAllBtn.addEventListener("click", function () {
+  if (batches.length === 0) return;
+  var sure = confirm("متأكدة إنك عايزة تحذفي كل الدفعات؟ (تقدري تسترجعيها من سلة المهملات تحت)");
+  if (sure) {
+    deleteAllData();
+    displayBatches(searchInput.value);
+  }
+});
+
+// أول ما الصفحة تفتح: نحمّل أي بيانات محفوظة من قبل، وبعدين نعرضها
+loadFromStorage();
+displayBatches("");
+
+</script>
+</body>
+</html>
